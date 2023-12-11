@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<RootNamespace>Oxide.Plugins</RootNamespace>
+		<AssemblyName>PayNow.GameServers.Plugins.OxideMod</AssemblyName>
+		<ProjectGuid>{3C3A47A5-709A-42BB-B2BF-DB1FA0FEE316}</ProjectGuid>
+		<TargetFramework>net48</TargetFramework>
+		<OutputType>Library</OutputType>
+		<LangVersion>8</LangVersion>
+		<Nullable>disable</Nullable>
+		<Configurations>Debug;Release</Configurations>
+		<Platforms>AnyCPU</Platforms>
+	</PropertyGroup>
+
+	<!-- make all references non-private, so they won't be copied to the output folder -->
+	<Target Name="ClearReferenceCopyLocalPaths" AfterTargets="ResolveAssemblyReferences">
+		<ItemGroup>
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+		</ItemGroup>
+	</Target>
+
+	<ItemGroup>
+		<PackageReference Include="Oxide.References" Version="2.0.*" />
+		<PackageReference Include="Oxide.Core" Version="2.0.*" />
+		<PackageReference Include="Oxide.CSharp" Version="2.0.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="PayNow.cs">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Compile>
+	</ItemGroup>
+</Project>
