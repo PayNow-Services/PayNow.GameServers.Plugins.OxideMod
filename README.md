@@ -1,2 +1,2 @@
 # PayNow OxideMod GameServer Plugin
-Simply copy `PayNow.cs` into your Oxide plugins directory
+Simply copy [PayNow.cs](https://github.com/PayNow-Services/PayNow.GameServers.Plugins.OxideMod/raw/main/src/PayNow.GameServers.Plugins.OxideMod/PayNow.cs) into your Oxide plugins directory
