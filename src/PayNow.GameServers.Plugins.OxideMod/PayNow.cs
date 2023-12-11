@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Oxide.Plugins
 {
-    [Info("PayNow", "PayNow Services Inc", "0.0.3")]
+    [Info("PayNow", "PayNow Services Inc", "0.0.4")]
     internal class PayNow : CovalencePlugin
     {
         const string API_URL = "https://api.paynow.gg/v1/delivery/command-queue/";
@@ -145,7 +145,7 @@ namespace Oxide.Plugins
 
                 try
                 {
-                    if (command.OnlineOnly && players.Connected.All(x => x.Id != command.CustomerId))
+                    if (command.OnlineOnly && players.Connected.All(x => x.Id != command.SteamId))
                         continue;
 
                     // Try executing the command
@@ -195,8 +195,8 @@ namespace Oxide.Plugins
             [JsonProperty("attempt_id")]
             public string AttemptId;
 
-            [JsonProperty("customer_id")]
-            public string CustomerId;
+            [JsonProperty("steam_id")]
+            public string SteamId;
 
             [JsonProperty("command")]
             public string Command;
