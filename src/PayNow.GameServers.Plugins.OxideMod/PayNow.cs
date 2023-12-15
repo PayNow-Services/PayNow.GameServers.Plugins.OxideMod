@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Oxide.Plugins
 {
-    [Info("PayNow", "PayNow Services Inc", "0.0.5")]
+    [Info("PayNow", "PayNow Services Inc", "0.0.6")]
     internal class PayNow : CovalencePlugin
     {
         const string API_URL = "https://api.paynow.gg/v1/delivery/command-queue/";
@@ -69,7 +69,7 @@ namespace Oxide.Plugins
             try
             {
                 // Make the API call
-                webrequest.Enqueue(API_URL, GetOnlinePlayersJson(), HandlePendingCommands, this, RequestMethod.GET, _headers);
+                webrequest.Enqueue(API_URL, BuildOnlinePlayersJson(), HandlePendingCommands, this, RequestMethod.POST, _headers);
             }
             catch (Exception ex)
             {
@@ -252,7 +252,7 @@ namespace Oxide.Plugins
             return _cachedStringBuilder.ToString();
         }
 
-        string GetOnlinePlayersJson()
+        string BuildOnlinePlayersJson()
         {
             _cachedStringBuilder.Clear();
 
