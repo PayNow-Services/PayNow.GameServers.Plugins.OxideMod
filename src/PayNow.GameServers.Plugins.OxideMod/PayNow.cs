@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Oxide.Plugins
 {
-    [Info("PayNow", "PayNow Services Inc", "0.0.4")]
+    [Info("PayNow", "PayNow Services Inc", "0.0.5")]
     internal class PayNow : CovalencePlugin
     {
         const string API_URL = "https://api.paynow.gg/v1/delivery/command-queue/";
@@ -19,7 +19,7 @@ namespace Oxide.Plugins
 
         readonly Dictionary<string, string> _headers = new Dictionary<string, string>();
         readonly CommandHistory _executedCommands = new CommandHistory(25);
-        readonly StringBuilder _acknowledgedCommandsStringBuilder = new StringBuilder();
+        readonly StringBuilder _cachedStringBuilder = new StringBuilder();
         readonly List<string> _successfulCommandsList = new List<string>(1000);
 
         #region Oxide
@@ -69,7 +69,7 @@ namespace Oxide.Plugins
             try
             {
                 // Make the API call
-                webrequest.Enqueue(API_URL, null, HandlePendingCommands, this, RequestMethod.GET, _headers);
+                webrequest.Enqueue(API_URL, GetOnlinePlayersJson(), HandlePendingCommands, this, RequestMethod.GET, _headers);
             }
             catch (Exception ex)
             {
@@ -131,14 +131,14 @@ namespace Oxide.Plugins
         void ProcessPendingCommands(QueuedCommand[] queuedCommands)
         {
             // Check if we got any data
-            if( queuedCommands.Length == 0 )
+            if (queuedCommands.Length == 0)
                 return;
-            
+
             _successfulCommandsList.Clear();
             for (int i = 0; i < queuedCommands.Length; i++)
             {
                 QueuedCommand command = queuedCommands[i];
-                
+
                 // Make sure we don't execute the same command twice
                 if (_executedCommands.Contains(command.AttemptId))
                     continue;
@@ -192,24 +192,19 @@ namespace Oxide.Plugins
         [Serializable]
         public class QueuedCommand
         {
-            [JsonProperty("attempt_id")]
-            public string AttemptId;
+            [JsonProperty("attempt_id")] public string AttemptId;
 
-            [JsonProperty("steam_id")]
-            public string SteamId;
+            [JsonProperty("steam_id")] public string SteamId;
 
-            [JsonProperty("command")]
-            public string Command;
+            [JsonProperty("command")] public string Command;
 
-            [JsonProperty("online_only")]
-            public bool OnlineOnly;
+            [JsonProperty("online_only")] public bool OnlineOnly;
 
-            [JsonProperty("queued_at")]
-            public string QueuedAt;
+            [JsonProperty("queued_at")] public string QueuedAt;
         }
 
         #endregion
-        
+
         #region Configuration
 
         [Serializable]
@@ -225,7 +220,7 @@ namespace Oxide.Plugins
         }
 
         #endregion
-        
+
         #region Helpers
 
         void UpdateHeaders()
@@ -236,25 +231,48 @@ namespace Oxide.Plugins
 
         string BuildAcknowledgeJson(List<string> orderIds)
         {
-            _acknowledgedCommandsStringBuilder.Clear();
+            _cachedStringBuilder.Clear();
 
             // Json format [{"attempt_id": "123"}]
-            _acknowledgedCommandsStringBuilder.Append("[");
+            _cachedStringBuilder.Append("[");
             for (int i = 0; i < orderIds.Count; i++)
             {
-                _acknowledgedCommandsStringBuilder.Append("{\"attempt_id\": \"");
-                _acknowledgedCommandsStringBuilder.Append(orderIds[i]);
-                _acknowledgedCommandsStringBuilder.Append("\"}");
+                _cachedStringBuilder.Append("{\"attempt_id\": \"");
+                _cachedStringBuilder.Append(orderIds[i]);
+                _cachedStringBuilder.Append("\"}");
 
                 if (i < orderIds.Count - 1)
                 {
-                    _acknowledgedCommandsStringBuilder.Append(",");
+                    _cachedStringBuilder.Append(",");
                 }
             }
 
-            _acknowledgedCommandsStringBuilder.Append("]");
+            _cachedStringBuilder.Append("]");
 
-            return _acknowledgedCommandsStringBuilder.ToString();
+            return _cachedStringBuilder.ToString();
+        }
+
+        string GetOnlinePlayersJson()
+        {
+            _cachedStringBuilder.Clear();
+
+            // Json format {"steam_ids": ["123"]}
+            _cachedStringBuilder.Append("{\"steam_ids\":[");
+            var addedPlayers = false;
+            foreach (var player in players.Connected)
+            {
+                addedPlayers = true;
+                _cachedStringBuilder.Append("\"");
+                _cachedStringBuilder.Append(player.Id);
+                _cachedStringBuilder.Append("\"");
+                _cachedStringBuilder.Append(",");
+            }
+
+            if (addedPlayers) _cachedStringBuilder.Remove(_cachedStringBuilder.Length - 2, 1);
+
+            _cachedStringBuilder.Append("]}");
+
+            return _cachedStringBuilder.ToString();
         }
 
         class CommandHistory
